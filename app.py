@@ -8,6 +8,8 @@ app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
