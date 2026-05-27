@@ -4,7 +4,13 @@
     <title>ResumeIQ</title>
 </head>
 <body>
+
     <h1>AI Resume Analyzer</h1>
-    <p>Vercel Deployment Successful 🚀</p>
+
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="resume" required>
+        <button type="submit">Analyze Resume</button>
+    </form>
+
 </body>
 </html>
