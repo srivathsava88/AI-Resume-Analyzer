@@ -1,11 +1,16 @@
 from flask import Flask, render_template, request
 import os
 import pdfplumber
+from groq import Groq
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
+)
 
 @app.route("/")
 def home():
@@ -33,7 +38,33 @@ def upload_resume():
             if extracted:
                 text += extracted
 
+    prompt = f"""
+    Analyze this resume and provide:
+
+    1. Resume Summary
+    2. Technical Skills
+    3. Strengths
+    4. Weaknesses
+    5. ATS Score out of 100
+    6. Suggestions for Improvement
+
+    Resume:
+    {text}
+    """
+
+    response = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    result = response.choices[0].message.content
+
     return f"""
-    <h2>Resume Uploaded Successfully</h2>
-    <pre>{text[:3000]}</pre>
+    <h1>AI Resume Analysis</h1>
+    <pre>{result}</pre>
     """
