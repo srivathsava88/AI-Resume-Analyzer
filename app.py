@@ -16,55 +16,62 @@ client = Groq(
 def home():
     return render_template("index.html")
 
+
+# PASTE THE NEW FUNCTION HERE
 @app.route("/upload", methods=["POST"])
 def upload_resume():
 
-    if "resume" not in request.files:
-        return "No file uploaded"
+    try:
 
-    file = request.files["resume"]
+        if "resume" not in request.files:
+            return "No file uploaded"
 
-    if file.filename == "":
-        return "No selected file"
+        file = request.files["resume"]
 
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
-    file.save(filepath)
+        if file.filename == "":
+            return "No selected file"
 
-    text = ""
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+        file.save(filepath)
 
-    with pdfplumber.open(filepath) as pdf:
-        for page in pdf.pages:
-            extracted = page.extract_text()
-            if extracted:
-                text += extracted
+        text = ""
 
-    prompt = f"""
-    Analyze this resume and provide:
+        with pdfplumber.open(filepath) as pdf:
+            for page in pdf.pages:
+                extracted = page.extract_text()
+                if extracted:
+                    text += extracted
 
-    1. Resume Summary
-    2. Technical Skills
-    3. Strengths
-    4. Weaknesses
-    5. ATS Score out of 100
-    6. Suggestions for Improvement
+        prompt = f"""
+        Analyze this resume and provide:
 
-    Resume:
-    {text}
-    """
+        1. Resume Summary
+        2. Technical Skills
+        3. Strengths
+        4. Weaknesses
+        5. ATS Score out of 100
+        6. Suggestions for Improvement
 
-    response = client.chat.completions.create(
-        model="llama3-8b-8192",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
-    )
+        Resume:
+        {text}
+        """
 
-    result = response.choices[0].message.content
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
 
-    return f"""
-    <h1>AI Resume Analysis</h1>
-    <pre>{result}</pre>
-    """
+        result = response.choices[0].message.content
+
+        return f"""
+        <h1>AI Resume Analysis</h1>
+        <pre>{result}</pre>
+        """
+
+    except Exception as e:
+        return f"ERROR: {str(e)}"
