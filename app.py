@@ -5,11 +5,6 @@ from groq import Groq
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = "uploads"
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
@@ -19,7 +14,7 @@ def home():
     return render_template("index.html")
 
 
-# PASTE THE NEW FUNCTION HERE
+# KEEP THE NEW FUNCTION HERE
 @app.route("/upload", methods=["POST"])
 def upload_resume():
 
@@ -33,12 +28,9 @@ def upload_resume():
         if file.filename == "":
             return "No selected file"
 
-        filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
-        file.save(filepath)
-
         text = ""
 
-        with pdfplumber.open(filepath) as pdf:
+        with pdfplumber.open(file) as pdf:
             for page in pdf.pages:
                 extracted = page.extract_text()
                 if extracted:
